@@ -1,5 +1,7 @@
 # Assignment 2
-# 
+# render a triangle to the viewport of the window and have it flash random colors
+# extra work - creates a rectangle background that flashes random colors
+# independent from the triangle
 
 import glfw
 import moderngl
@@ -54,6 +56,21 @@ triangle_vertices = numpy.array([
 
 triangle_vbo = ctx.buffer(triangle_vertices)
 
+# extra work (not part of hw)
+quad_vertices = numpy.array([
+     0.8,  0.8,  # Top right
+    -0.8,  0.8,  # Top left
+    -0.8, -0.8,  # Bottom left
+     0.8, -0.8   # Bottom right
+], dtype='f4')
+
+quad_vbo = ctx.buffer(quad_vertices)
+quad_indices = numpy.array([
+    0, 1, 2,
+    2, 3, 0
+], dtype = 'i4')
+quad_ibo = ctx.buffer(quad_indices)
+
 # vertex shader
 vShader_code = '''
 #version 330 core
@@ -75,6 +92,12 @@ shader_program = ctx.program(vertex_shader = vShader_code, fragment_shader = fSh
 
 triangle_vao = ctx.vertex_array(shader_program, [(triangle_vbo, "2f", "position")])
 
+# extra work (not part of hw)
+quad_vao = ctx.vertex_array(
+    shader_program, [(quad_vbo, "2f", "position")],
+    index_buffer = quad_ibo
+    )
+
 FPS = 5
 RENDER_INTERVAL = 1/FPS
 last_render_time = 0.0
@@ -87,8 +110,16 @@ while not glfw.window_should_close(window):
         
         ctx.clear(0.2, 0.2, 0.2)
 
+        #extra work (not included in hw)
+        shader_program["color"] = (random(), random(), random())
+        quad_vao.render()
+
         shader_program["color"] = (random(), random(), random())
         triangle_vao.render()
         
 
         glfw.swap_buffers(window)
+
+# Clean up when finished
+glfw.destroy_window(window)
+glfw.terminate()
